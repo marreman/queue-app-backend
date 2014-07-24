@@ -18,5 +18,8 @@
   "homepage": "https://github.com/marreman/queue-app-backend",
   "dependencies": {
     "firebase": "^1.0.17"
+  },
+  "engines": {
+    "node": "0.10.x"
   }
 }
