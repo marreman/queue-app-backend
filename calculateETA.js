@@ -11,7 +11,7 @@ function Beacon(beaconId) {
 }
 
 Beacon.prototype.onSessionsUpdated = function (snap) {
-  var eta = this.calulateETA(snap.val());
+  var eta = this.calculateETA(snap.val());
   locations.child(this.id).child('eta').set(eta)
 };
 
