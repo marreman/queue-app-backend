@@ -17,8 +17,10 @@ function Beacon(beaconId) {
 }
 
 Beacon.prototype.onSessionsUpdated = function (snap) {
-  var eta = this.calculateETA(snap.val());
-  locations.child(this.id).child('eta').set(eta);
+  var estimatedQueueTime = this.calculateETA(snap.val());
+  locations
+    .child(this.id + '/currentStatus/estimatedQueueTime')
+    .set(estimatedQueueTime);
 };
 
 Beacon.prototype.calculateETA = function (sessionEntries) {
