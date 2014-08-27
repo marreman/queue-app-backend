@@ -23,6 +23,7 @@ Beacon.prototype.calculateCurrentStatus = function (sessionEntries) {
     , sumOfEntries = 0
     , numberOfEntries = 0
     , numberOfFemales = 0
+    , numberOfTrans = 0
     , numberOfMales = 0
     , timeLimit = new Date().getTime() - TIME_LIMIT;
 
@@ -42,6 +43,7 @@ Beacon.prototype.calculateCurrentStatus = function (sessionEntries) {
         numberOfEntries++;
         if (session.gender === 'male') numberOfMales++;
         else if (session.gender === 'female') numberOfFemales++;
+        else if (session.gender === 'trans') numberOfTrans++;
       }
     }
   }
@@ -51,7 +53,8 @@ Beacon.prototype.calculateCurrentStatus = function (sessionEntries) {
   return {
     estimatedQueueTime: numberOfEntries ? estimatedQueueTime : null,
     numberOfFemales: numberOfMales,
-    numberOfMales: numberOfMales
+    numberOfMales: numberOfMales,
+    numberOfTrans: numberOfTrans
   };
 };
 
