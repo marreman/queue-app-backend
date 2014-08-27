@@ -1,1 +1,1 @@
-worker: node calculateETA.js
+worker: node calculate-current-status.js
