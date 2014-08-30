@@ -4,7 +4,11 @@ var root = new Firebase('https://queue-app.firebaseio.com/')
   , locations = root.child('locations')
   , queueSessions = root.child('queueSessions')
   , beacons = []
-  , TIME_LIMIT = 60 * 60 * 60 * 1000; //ONE HOUR IN MILLISECONDS
+  , ONE_HOUR = 60 * 60 * 60;
+
+function getCurrentUnixTimestamp() {
+  return (new Date().getTime() / 1000).toFixed();
+}
 
 function Beacon(beaconId) {
   this.id = beaconId;
@@ -19,43 +23,44 @@ Beacon.prototype.onSessionsUpdated = function (snap) {
 };
 
 Beacon.prototype.calculateCurrentStatus = function (sessionEntries) {
-  var estimatedQueueTime
+  var result = {
+      estimatedQueueTime: null,
+      numberOfFemales: 0,
+      numberOfMales: 0,
+      numberOfTrans: 0,
+      totalNumberOfVisitors: 0
+    }
     , sumOfEntries = 0
     , numberOfEntries = 0
-    , numberOfFemales = 0
-    , numberOfTrans = 0
-    , numberOfMales = 0
-    , timeLimit = new Date().getTime() - TIME_LIMIT;
+    , oneHourAgo = getCurrentUnixTimestamp() - ONE_HOUR;
 
-  if (!sessionEntries) {
+  if (!sessionEntries) {
     return null;
   }
 
   for (var name in sessionEntries) {
     var session = sessionEntries[name]
-      , queueTime;
+      , queueTime = session.end - session.start;
 
-    if (session.end > timeLimit) {
-      queueTime = session.end - session.start;
+    if (session.end < oneHourAgo || queueTime < 0) {
+      continue;
+    }
 
-      if (queueTime > 0) {
-        sumOfEntries += queueTime;
-        numberOfEntries++;
-        if (session.gender === 'male') numberOfMales++;
-        else if (session.gender === 'female') numberOfFemales++;
-        else if (session.gender === 'trans') numberOfTrans++;
-      }
+    sumOfEntries += queueTime;
+    numberOfEntries++;
+
+    switch (session.gender) {
+      case 'male': result.numberOfMales++; break;
+      case 'female': result.numberOfFemales++; break;
+      case 'trans': result.numberOfTrans++; break;
     }
   }
 
-  estimatedQueueTime = (sumOfEntries / numberOfEntries).toFixed();
+  result.totalNumberOfVisitors = numberOfEntries;
+  result.estimatedQueueTime = numberOfEntries ?
+      (sumOfEntries / numberOfEntries).toFixed() : null;
 
-  return {
-    estimatedQueueTime: numberOfEntries ? estimatedQueueTime : null,
-    numberOfFemales: numberOfMales,
-    numberOfMales: numberOfMales,
-    numberOfTrans: numberOfTrans
-  };
+  return result;
 };
 
 queueSessions.on('child_added', function (snap) {
