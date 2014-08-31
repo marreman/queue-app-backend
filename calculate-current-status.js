@@ -4,7 +4,7 @@ var root = new Firebase('https://queue-app.firebaseio.com/')
   , locations = root.child('locations')
   , queueSessions = root.child('queueSessions')
   , beacons = []
-  , ONE_HOUR = 60 * 60 * 60;
+  , ONE_HOUR = 60 * 60;
 
 function getCurrentUnixTimestamp() {
   return (new Date().getTime() / 1000).toFixed();
@@ -49,14 +49,19 @@ Beacon.prototype.calculateCurrentStatus = function (sessionEntries) {
     sumOfEntries += queueTime;
     numberOfEntries++;
 
+    if (!session.gender) {
+      continue;
+    }
+
     switch (session.gender) {
       case 'male': result.numberOfMales++; break;
       case 'female': result.numberOfFemales++; break;
       case 'trans': result.numberOfTrans++; break;
     }
+
+    result.totalNumberOfVisitors++;
   }
 
-  result.totalNumberOfVisitors = numberOfEntries;
   result.estimatedQueueTime = numberOfEntries ?
       (sumOfEntries / numberOfEntries).toFixed() : null;
 
